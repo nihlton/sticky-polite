@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sticky Polite Playground</title>
+    <link href="./playground.css" rel="stylesheet" type="text/css" />
+  </head>
+  <body>
+    <header id="main-header" class="sticky-polite">
+      <h1>Playground</h1>
+      <p>Scroll down to test the behavior.</p>
+    </header>
+    <div class="content">
+      <p>
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi sed rhoncus urna, at tincidunt nisi. Fusce blandit eros dui, vestibulum
+        tincidunt metus mollis a. Suspendisse tempor mollis ipsum id malesuada. Nunc in nisi nisi. Nulla dolor nunc, venenatis sit amet tortor nec,
+        pharetra consequat justo. Cras vel ornare erat. Nullam pellentesque nisl at ante ultrices pharetra. Fusce porta placerat metus, commodo
+        maximus felis sodales et. Nam ut enim dictum, euismod quam ut, sollicitudin nulla. Cras tempus purus nec purus accumsan, ut malesuada lacus
+        mattis. Cras sollicitudin, velit in laoreet luctus, metus turpis fermentum quam, vel tristique velit elit ut sapien. Nullam placerat diam eu
+        lobortis egestas. Ut aliquet, ligula id laoreet vestibulum, nisi ante volutpat ante, vel placerat diam est porta dui. Vestibulum ut purus ut
+        diam fringilla rutrum sed nec purus.
+      </p>
+      <p>
+        Phasellus sed ante ligula. Mauris dui lorem, commodo eget lectus vitae, vulputate interdum ligula. Donec nec justo faucibus, scelerisque lacus
+        ac, tincidunt leo. Mauris faucibus, lorem eu rutrum dapibus, orci lorem luctus metus, vitae consectetur velit enim at ipsum. Morbi rhoncus,
+        dui in interdum lacinia, dolor felis porta nulla, eu fringilla ligula dui eget erat. Integer eu scelerisque sapien. Vestibulum vestibulum
+        sollicitudin lacus, in aliquam sem vestibulum sit amet. Donec eleifend sollicitudin mi, ac lacinia turpis eleifend ut. Quisque semper mi ut
+        mauris malesuada mattis. Phasellus quis ante eu eros blandit mattis eu quis sem. Suspendisse ultricies tincidunt metus tincidunt sagittis.
+        Etiam commodo urna ut eros sodales, interdum tincidunt elit convallis.
+      </p>
+      <div class="nested-test">
+        <header class="sticky-polite"><h2>Nested Header</h2></header>
+        <p>This header should be constrained to its scrolling parent</p>
+        <div class="dummy"></div>
+      </div>
+      <div class="nested-test horizontal">
+        <ul class="sticky-polite menu-left">
+          <li><strong>sticky left</strong></li>
+          <li>item 1</li>
+          <li>item 2</li>
+          <li>item 3</li>
+          <li>item 4</li>
+          <li>item 5</li>
+        </ul>
+        <div class="dummy"></div>
+      </div>
+      <div class="nested-test horizontal">
+        <div class="dummy"></div>
+        <ul class="sticky-polite menu-right">
+          <li><strong>sticky right</strong></li>
+          <li>item 1</li>
+          <li>item 2</li>
+          <li>item 3</li>
+          <li>item 4</li>
+          <li>item 5</li>
+        </ul>
+      </div>
+      <p>
+        Sed congue mi quis semper pellentesque. Nunc eros est, lacinia ac est sit amet, malesuada consectetur risus. Phasellus sapien ex, volutpat sed
+        convallis eu, luctus non nulla. Praesent non auctor nisl. Morbi vestibulum fringilla enim, id accumsan enim cursus ut. In non lorem pretium,
+        placerat leo vitae, lobortis dolor. Interdum et malesuada fames ac ante ipsum primis in faucibus. Duis at blandit ligula, vel viverra elit.
+        Morbi finibus tortor eget lorem pulvinar, at imperdiet libero accumsan. Morbi id ultricies est. Duis eget egestas lacus, ac efficitur dolor.
+        Integer quis iaculis leo. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Curabitur fermentum,
+        diam consectetur aliquam tempor, diam est suscipit diam, at congue felis purus ut nisi. Cras congue elit eget rutrum vestibulum.
+      </p>
+      <p>
+        Etiam nec mauris nec arcu cursus vehicula. Aliquam eu rutrum nulla, eget vehicula felis. Phasellus tristique ipsum felis, in varius ipsum
+        luctus fringilla. Maecenas justo ligula, porttitor quis lorem ac, imperdiet semper ex. Sed rhoncus quam ipsum, vel elementum enim sagittis at.
+        Fusce tempus accumsan vehicula. Nunc at pulvinar justo.
+      </p>
+      <p>
+        Ut at quam sit amet arcu molestie vestibulum. Ut at mi vitae purus malesuada vulputate non sit amet massa. Phasellus rhoncus ante ligula, a
+        porttitor risus volutpat vitae. Ut sed rutrum ligula. Nulla et pretium mauris. Nullam faucibus tincidunt est, ac tristique est vulputate sit
+        amet. Proin eget dui nec lectus convallis aliquet eu nec lectus. Duis tincidunt metus sit amet mollis volutpat. Sed interdum, felis ut iaculis
+        congue, ante sapien tempor sem, et hendrerit dui quam vel urna. Duis sollicitudin, lorem vitae tempor auctor, diam magna pharetra eros,
+        sollicitudin tempor tortor lorem at nisi. Donec semper, magna ut interdum vulputate, est libero luctus justo, at pretium dolor elit eget nunc.
+        Integer magna purus, sagittis vel quam sed, pretium lobortis tellus. Maecenas dictum velit nec purus egestas condimentum.
+      </p>
+
+      <div class="dummy"></div>
+    </div>
+
+    <footer class="sticky-polite">footer &bull; links &bull; etc</footer>
+    <script type="module" src="../dist/index.js"></script>
+  </body>
+</html>

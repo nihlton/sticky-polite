@@ -1,0 +1,39 @@
+{
+  "name": "sticky-polite",
+  "version": "1.0.0",
+  "description": "Position sticky when you need it, out of the way when you dont",
+  "keywords": [
+    "css",
+    "sticky"
+  ],
+  "sideEffects": true,
+  "homepage": "https://github.com/nihlton/sticky-polite#readme",
+  "bugs": {
+    "url": "https://github.com/nihlton/sticky-polite/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nihlton/sticky-polite.git"
+  },
+  "license": "MIT",
+  "author": "greg archer",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsup src/index.ts",
+    "build:watch": "tsup --watch",
+    "serve": "live-server --open=playground/ --quiet",
+    "dev": "concurrently \"npm run build:watch\" \"npm run serve\"",
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.2",
+    "concurrently": "^9.2.1",
+    "eslint": "^9.39.2",
+    "live-server": "^1.2.2",
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.50.1"
+  }
+}
