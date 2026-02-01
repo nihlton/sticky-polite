@@ -67,7 +67,6 @@ export const applyStatic = (state: ElementState) => {
   element.setAttribute(CONFIG.attrName, "static");
 };
 
-// Safe to call inside ResizeObserver
 export const measureViewportSize = (parent: HTMLElement, edge: Edge): number => {
   const isVertical = edge === "top" || edge === "bottom";
   if (parent === document.documentElement) {
@@ -188,8 +187,6 @@ export const isCompletelyOutOfView = (element: HTMLElement, parent: HTMLElement)
 
 export const readConfigFromDOM = (element: HTMLElement): Config => {
   // 1. Clean Slate: Temporarily remove inline positioning.
-  // This prevents 'position: relative' from generating computed artifacts
-  // (e.g., preventing 'top' from computing to '-32px' when 'bottom' is set).
   const prevPosition = element.style.position;
   const isManaged = element.hasAttribute(CONFIG.attrName);
 
@@ -209,8 +206,6 @@ export const readConfigFromDOM = (element: HTMLElement): Config => {
         const val = map.get(edge);
 
         // In Typed OM, 'auto' is a CSSKeywordValue. We only want CSSUnitValue.
-        // We also check value != 0 to ensure we don't accidentally grab a default.
-        // (If explicit 'top: 0' is set, it will be valid).
         if (val && "value" in val && typeof val.value === "number") {
           if (foundEdge) {
             // Restore before returning

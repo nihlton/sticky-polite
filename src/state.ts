@@ -135,7 +135,6 @@ export const updateElementState = (state: ElementState) => {
       } else {
         const stickyThreshold = currentScroll + viewportSize - offset;
         // If we slid up enough to hit the bottom offset
-        // Note: currentVisualPos is Top. We check Bottom.
         shouldStick = currentVisualPos + dimension <= stickyThreshold + CONFIG.epsilon;
       }
 
