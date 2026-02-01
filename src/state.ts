@@ -23,11 +23,8 @@ export const updateElementState = (state: ElementState) => {
   const currentScroll = getScrollPosition(parent, edge);
   const scrollDelta = currentScroll - lastScrollPos;
 
-  // performance hack.  our measurements of the element's location includes this offset
-  // in order to skip a step where we would remove it, measure, and then re-apply.
-  // we simply double the value here to negate this side effect
   const edgePadding = state.cachedViewportPadding[edge];
-  const offset = config.offset * 2 + edgePadding;
+  const offset = config.offset + edgePadding;
 
   state.lastScrollPos = currentScroll;
 
@@ -36,11 +33,6 @@ export const updateElementState = (state: ElementState) => {
   const dimension = isVertical ? naturalRect.height : naturalRect.width;
 
   // Logic Inversion for End Anchors (Bottom/Right)
-  // "Scroll Away" means increasing scroll (down/right) for Top/Left,
-  // BUT decreasing scroll (up/left) for Bottom/Right??
-  // TRD v3.2: Scroll Away = Pushes element off screen via anchor edge.
-  // Top: Scroll Down (Delta > 0) -> Push Top off.
-  // Bottom: Scroll Up (Delta < 0) -> Push Bottom off.
   const isScrollingAway = isStartAnchor ? scrollDelta > 0 : scrollDelta < 0;
   const isScrollingToward = isStartAnchor ? scrollDelta < 0 : scrollDelta > 0;
 

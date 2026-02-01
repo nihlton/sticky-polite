@@ -21,7 +21,6 @@ export interface ElementState {
   isSticky: boolean;
   isTransforming: boolean;
   attributeObserver: MutationObserver;
-  resizeObserver: ResizeObserver;
   cachedViewportPadding: paddingConfig;
   currentTranslation: number;
   cachedConfig: Config;

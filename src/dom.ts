@@ -71,6 +71,9 @@ export const applyStatic = (state: ElementState) => {
 export const measureViewportSize = (parent: HTMLElement, edge: Edge): number => {
   const isVertical = edge === "top" || edge === "bottom";
   if (parent === document.documentElement) {
+    if (window.visualViewport) {
+      return isVertical ? window.visualViewport.height : window.visualViewport.width;
+    }
     return isVertical ? window.innerHeight : window.innerWidth;
   }
   return isVertical ? parent.clientHeight : parent.clientWidth;
@@ -158,15 +161,27 @@ export const measureNaturalRect = (element: HTMLElement, parent: HTMLElement): D
 
 export const isCompletelyOutOfView = (element: HTMLElement, parent: HTMLElement): boolean => {
   const rect = element.getBoundingClientRect();
-  const parentRect =
-    parent === document.documentElement
-      ? {
-          top: 0,
-          left: 0,
-          bottom: window.innerHeight,
-          right: window.innerWidth,
-        }
-      : parent.getBoundingClientRect();
+
+  let parentRect;
+  if (parent === document.documentElement) {
+    if (window.visualViewport) {
+      parentRect = {
+        top: 0,
+        left: 0,
+        bottom: window.visualViewport.height,
+        right: window.visualViewport.width,
+      };
+    } else {
+      parentRect = {
+        top: 0,
+        left: 0,
+        bottom: window.innerHeight,
+        right: window.innerWidth,
+      };
+    }
+  } else {
+    parentRect = parent.getBoundingClientRect();
+  }
 
   return rect.bottom < parentRect.top || rect.top > parentRect.bottom || rect.right < parentRect.left || rect.left > parentRect.right;
 };
@@ -187,7 +202,6 @@ export const readConfigFromDOM = (element: HTMLElement): Config => {
   let foundOffset = 0;
 
   // 2. Attempt Modern API (CSS Typed OM)
-  // Cleaner parsing, handles 'auto' vs '0px' natively.
   if ("computedStyleMap" in element) {
     try {
       const map = element.computedStyleMap();
@@ -207,9 +221,7 @@ export const readConfigFromDOM = (element: HTMLElement): Config => {
           foundOffset = val.value;
         }
       }
-    } catch (e) {
-      // Fallback to standard if Typed OM misbehaves
-    }
+    } catch (e) {}
   }
 
   // 3. Fallback (Firefox / Legacy) or if Typed OM was skipped
