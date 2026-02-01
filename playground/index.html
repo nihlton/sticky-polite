@@ -8,47 +8,118 @@
   </head>
   <body>
     <header id="main-header" class="sticky-polite">
-      <h1>Playground</h1>
+      <h1>Sticky-Polite</h1>
     </header>
     <div class="content">
-      <p>Scroll down to test the behavior.</p>
+      <p><em>Scroll down to test the behavior.</em></p>
+
       <p>
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi sed rhoncus urna, at tincidunt nisi. Fusce blandit eros dui, vestibulum
-        tincidunt metus mollis a. Suspendisse tempor mollis ipsum id malesuada. Nunc in nisi nisi. Nulla dolor nunc, venenatis sit amet tortor nec,
-        pharetra consequat justo. Cras vel ornare erat. Nullam pellentesque nisl at ante ultrices pharetra. Fusce porta placerat metus, commodo
-        maximus felis sodales et. Nam ut enim dictum, euismod quam ut, sollicitudin nulla. Cras tempus purus nec purus accumsan, ut malesuada lacus
-        mattis. Cras sollicitudin, velit in laoreet luctus, metus turpis fermentum quam, vel tristique velit elit ut sapien. Nullam placerat diam eu
-        lobortis egestas. Ut aliquet, ligula id laoreet vestibulum, nisi ante volutpat ante, vel placerat diam est porta dui. Vestibulum ut purus ut
-        diam fringilla rutrum sed nec purus.
+        A robust, zero-dependency utility for "Polite" sticky positioning. Imagine if <code>position: sticky</code> could understand when your user
+        wants it out of the way and politely excuses itself from the viewport.
       </p>
+      <p>It strikes a balance between keeping important page elements highly available, and keeping the screen clear of distractions.</p>
       <p>
-        Phasellus sed ante ligula. Mauris dui lorem, commodo eget lectus vitae, vulputate interdum ligula. Donec nec justo faucibus, scelerisque lacus
-        ac, tincidunt leo. Mauris faucibus, lorem eu rutrum dapibus, orci lorem luctus metus, vitae consectetur velit enim at ipsum. Morbi rhoncus,
-        dui in interdum lacinia, dolor felis porta nulla, eu fringilla ligula dui eget erat. Integer eu scelerisque sapien. Vestibulum vestibulum
-        sollicitudin lacus, in aliquam sem vestibulum sit amet. Donec eleifend sollicitudin mi, ac lacinia turpis eleifend ut. Quisque semper mi ut
-        mauris malesuada mattis. Phasellus quis ante eu eros blandit mattis eu quis sem. Suspendisse ultricies tincidunt metus tincidunt sagittis.
-        Etiam commodo urna ut eros sodales, interdum tincidunt elit convallis.
+        As an example - Scrolling down allows your header to gracefully scroll off screen, returning valuable screen real estate. Scrolling up later
+        immediately recalls your header.
       </p>
+
+      <p><strong>Key Features:</strong></p>
+      <ul>
+        <li><strong>Nearly-Zero setup:</strong> Apply the class name <code>sticky-polite</code> to an element, and you are done.</li>
+        <li><strong>Axis and Direction agnostic:</strong> Elements can stick to the top, bottom, left or right.</li>
+        <li>
+          <strong>SPA Ready:</strong> Performance-optimized observers catch <code>sticky-polite</code> elements as they're created and destroyed to
+          handle React/Vue/Svelte lifecycles automatically.
+        </li>
+        <li><strong>Supports nested scrolling containers:</strong> Elements within a scroll container will respect the boundaries of its parent.</li>
+        <li>
+          <strong>No animations/transitions:</strong> Interactions feel buttery and smooth, like native browser behavior - because most of it is!
+        </li>
+      </ul>
+      <h2>Installation</h2>
+      <pre><code class="language-bash">npm install sticky-polite
+</code></pre>
+      <h2>Usage</h2>
+      <p>Import the package.</p>
+      <pre><code class="language-html">&lt;script src="https://unpkg.com/sticky-polite/dist/index.cjs"&gt;&lt;/script&gt;
+</code></pre>
+      <pre><code class="language-javascript">// main.js or index.js
+import "sticky-polite";
+</code></pre>
+      <p>Add the class and an edge offset to an element:</p>
+      <pre><code class="language-html">&lt;header class="sticky-polite" style="top: 1rem"&gt;My Header&lt;/header&gt;
+</code></pre>
+      <p>or</p>
+      <pre><code>&lt;style&gt; 
+  footer.sticky-polite { bottom: 20px }
+&lt;/style&gt;
+
+...
+
+&lt;footer class="sticky-polite"&gt;My Footer&lt;/footer&gt;
+</code></pre>
+      <p><strong>Important Notes:</strong></p>
+      <ul>
+        <li>
+          <strong>defined edge</strong>: sticky-polite elements must have one edge offset defined. Elements with more than one, or less than one edge
+          will be ignored.
+        </li>
+        <li>
+          <strong>nested containers</strong>: elements with an edge offset greater than zero, which are nested within a scrolling container may never
+          be able to return to their static/natural position. This reflects the browser's native <code>'position: sticky'</code> behavior, but is
+          something to be aware of. You may find it useful to set the edge to '0px' and apply a padding value to the parent instead.
+        </li>
+      </ul>
+      <h2>Advanced Usage</h2>
+      <p>You can optionally style the element based on the state it's in.</p>
+      <ul>
+        <li><code>static</code> - The default state, where the element is resting in it's natural position</li>
+        <li>
+          <code>intersect</code> - The element was off-screen, and you have begun scrolling towards it. It enters this state as it begins to reveal
+          itself
+        </li>
+        <li>
+          <code>sticky</code> - The element is stuck to the view port edge (e.g. The element is fully revealed, and you are scrolling toward its
+          natural position)
+        </li>
+      </ul>
+      <pre><code class="language-css">.sticky-polite[data-polite-state="static"] {
+  box-shadow: none;
+}
+
+.sticky-polite[data-polite-state="intersect"] {
+  box-shadow: 0 0 0 3px orange;
+}
+
+.sticky-polite[data-polite-state="sticky"] {
+  box-shadow: 0 1em 2em rgba(0, 0, 0, 0.2);
+}
+</code></pre>
+
+      <h2>Examples</h2>
       <div class="nested-test">
         <header class="sticky-polite"><h2>Nested Header</h2></header>
-        <p>This header should be constrained to its scrolling parent</p>
+        <p>This header and footer should be constrained to their scrolling parent</p>
         <div class="dummy"></div>
+        <footer class="sticky-polite">footer &bull; links &bull; etc</footer>
       </div>
       <div class="nested-test horizontal">
         <ul class="sticky-polite menu-left">
-          <li><strong>sticky left</strong></li>
+          <li><strong>stick.left</strong></li>
           <li>item 1</li>
           <li>item 2</li>
           <li>item 3</li>
           <li>item 4</li>
           <li>item 5</li>
         </ul>
-        <div class="dummy"></div>
+        <div class="dummy">
+          <p>scroll left / right</p>
+        </div>
       </div>
       <div class="nested-test horizontal">
-        <div class="dummy"></div>
+        <div class="dummy"><p>scroll left / right</p></div>
         <ul class="sticky-polite menu-right">
-          <li><strong>sticky right</strong></li>
+          <li><strong>stick.right</strong></li>
           <li>item 1</li>
           <li>item 2</li>
           <li>item 3</li>

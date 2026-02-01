@@ -8,6 +8,13 @@ body {
   max-width: 80em;
 }
 
+pre code {
+  background: #eee;
+  display: block;
+  padding: 1em;
+  border-radius: 0.5em;
+}
+
 .sticky-polite {
   border-radius: 0.5em;
   background: #eee;
@@ -23,10 +30,13 @@ body {
 
 header {
   top: 2vmax;
-  padding: 2rem;
+  padding: 1rem 1.5rem;
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  width: 60em;
+  max-width: calc(min(100vw, 100%) - 4vmax);
+  margin: auto;
 
   h1,
   h2,
@@ -38,6 +48,7 @@ header {
 header {
   z-index: 3;
 }
+
 div > header {
   z-index: 2;
   top: 0px;
@@ -77,18 +88,25 @@ footer {
     }
     .menu-left,
     .menu-right {
-      min-width: 7rem;
+      min-width: 6em;
       margin: 0;
-      padding: 1em;
+      padding: 0.75em;
       list-style-type: none;
       li {
         padding: 0.25em 0.5em;
         margin: 0;
+        border-bottom: 1px solid #ccc;
       }
     }
     .dummy {
       height: 100%;
       min-width: 200vw;
+      p {
+        padding: 0.5em 1em;
+        background: #fff;
+        margin: 0;
+        display: inline-block;
+      }
     }
   }
 }
@@ -100,5 +118,5 @@ footer {
 
 .dummy {
   height: 140em;
-  background: repeating-linear-gradient(45deg, #eee, #eee 3px, #fff0 3px, #fff0 6px);
+  background: repeating-linear-gradient(45deg, #fff0, #fff0 0.5em, #eee 0.5em, #eee 0.7em);
 }
