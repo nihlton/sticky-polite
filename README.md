@@ -83,6 +83,10 @@ You can optionally style the element based on the state it's in.
 }
 ```
 
+**Important Notes:**
+
+- **foot guns**: you can pretty easily shoot yourself in the foot by applying CSS which changes the element's dimensions or position. The utility will do what it can to adapt, but apply these state styles with caution, and test extensively.
+
 ## Development
 
 This repo uses `tsup` for bundling and `live-server` for a parallel-watch playground.

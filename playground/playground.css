@@ -11,14 +11,18 @@ body {
 }
 
 pre code {
-  background: #eee;
   display: block;
   padding: 1em;
-  border-radius: 0.5em;
   max-width: 100%;
   overflow: auto;
   scrollbar-width: thin;
   scrollbar-color: #888 transparent;
+}
+
+code {
+  background: #eee;
+  padding: 0.25em 0.5em;
+  border-radius: 0.25em;
 }
 
 .sticky-polite {
