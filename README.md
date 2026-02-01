@@ -18,6 +18,10 @@ As an example - Scrolling down allows your header to gracefully scroll off scree
 - **Supports nested scrolling containers:** Elements within a scroll container will respect the boundaries of its parent.
 - **No animations/transitions:** Interactions feel buttery and smooth, like native browser behavior - because most of it is!
 
+**Limitations:**
+
+- **Mobile footer:** Mobile browsers manipulate the viewport size when you scroll down in a ways that are difficult to predict/track/adapt to. Footers whose scrolling-parent are the body/document cannot always transition smoothly between 'hidden' and 'visible' and vice versa. So it goes.
+
 ## Installation
 
 ```bash
