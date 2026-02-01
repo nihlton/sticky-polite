@@ -62,7 +62,7 @@ or
 
 **Important Notes:**
 
-- **defined edge**: sticky-polite elements must have one edge offset defined. Elements with more than one, or less than one edge will be ignored.
+- **defined edge**: `sticky-polite` elements must have one edge offset defined. Elements with more than one, or less than one edge will be ignored.
 - **nested containers**: elements with an edge offset greater than zero, which are nested within a scrolling container may never be able to return to their static/natural position. This reflects the browser's native `'position: sticky'` behavior, but is something to be aware of. You may find it useful to set the edge to '0px' and apply a padding value to the parent instead.
 
 ## Advanced Usage
