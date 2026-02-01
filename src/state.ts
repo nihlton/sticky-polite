@@ -50,16 +50,12 @@ export const updateElementState = (state: ElementState) => {
 
   if (isStartAnchor) {
     // Top/Left: Safe if natural pos is below the sticky line
-    isNaturalSafe = naturalStart >= currentScroll + offset;
+    isNaturalSafe = naturalStart >= currentScroll + offset - CONFIG.epsilon;
   } else {
     // Bottom/Right: Safe if natural pos is above the sticky line
     // Sticky Line = Scroll + Viewport - Offset
     // Element End = naturalStart + dimension
-    isNaturalSafe = naturalStart + dimension <= currentScroll + viewportSize - offset;
-  }
-
-  if (isNaturalSafe && state.cachedConfig.edge === "top") {
-    console.log(offset, state);
+    isNaturalSafe = naturalStart + dimension <= currentScroll + viewportSize - offset + CONFIG.epsilon;
   }
 
   if (isNaturalSafe) {

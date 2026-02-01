@@ -3,7 +3,7 @@ body {
   font-family: sans-serif;
   min-height: 300vh;
   margin: 0 auto;
-  padding: 4rem;
+  padding: 3vmax 2vmax;
   color: #333;
   max-width: 80em;
 }
@@ -22,7 +22,7 @@ body {
 }
 
 header {
-  top: 2rem;
+  top: 2vmax;
   padding: 2rem;
   display: flex;
   flex-direction: column;
@@ -46,13 +46,13 @@ div > header {
 footer {
   bottom: 1rem;
   padding: 0.5rem 1rem;
-  max-width: calc(min(100vw, 100%) - 4rem);
+  max-width: calc(min(100vw, 100%) - 4vmax);
   margin: 1.4em auto;
 }
 
 .content {
   width: 60em;
-  max-width: calc(min(100vw, 100%) - 4rem);
+  max-width: calc(min(100vw, 100%) - 4vmax);
   margin: 1.4em auto;
   line-height: 1.4em;
 }
@@ -88,7 +88,7 @@ footer {
     }
     .dummy {
       height: 100%;
-      min-width: 400vw;
+      min-width: 200vw;
     }
   }
 }
