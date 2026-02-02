@@ -1,3 +1,5 @@
+// observer.ts
+
 import { CONFIG } from "./constants";
 import {
   applyStatic,
@@ -6,6 +8,7 @@ import {
   getContainerPadding,
   getScrollParent,
   injectAnimationBeacon,
+  measureConstraintRect, // New Import
   measureNaturalRect,
   measureViewportSize,
   readConfigFromDOM,
@@ -16,17 +19,19 @@ import { ElementState } from "./types";
 const stateRegistry = new Map<HTMLElement, ElementState>();
 const cleanupRegistry = new Map<HTMLElement, () => void>();
 
-// Throttling map for requestAnimationFrame - to keep scheduled handlers from stacking up
 const resizeTickMap = new WeakMap<ElementState, boolean>();
 
 const refreshState = (state: ElementState) => {
-  const { element, parent } = state;
+  const { element, parent, directParent } = state;
   state.cachedConfig = readConfigFromDOM(element);
   state.naturalRect = measureNaturalRect(element, parent);
+
+  // Change: Use measureConstraintRect to handle scroll containers correctly
+  state.directParentRect = measureConstraintRect(directParent, parent);
+
   state.cachedViewportSize = measureViewportSize(parent, state.cachedConfig.edge);
   state.cachedViewportPadding = getContainerPadding(parent);
 
-  // Safe Reset
   if (state.isSticky) {
     applySticky(element);
   } else {
@@ -47,12 +52,11 @@ const scheduleRefresh = (state: ElementState) => {
   resizeTickMap.set(state, true);
 };
 
-// --- Observers & Listeners ---
 const handleResizeObserver = (entries: ResizeObserverEntry[]) => {
   const changedNodes = new Set(entries.map((e) => e.target));
 
   for (const state of stateRegistry.values()) {
-    if (changedNodes.has(state.element) || changedNodes.has(state.parent)) {
+    if (changedNodes.has(state.element) || changedNodes.has(state.parent) || changedNodes.has(state.directParent)) {
       scheduleRefresh(state);
     }
   }
@@ -68,11 +72,11 @@ const handleVisualViewport = () => {
 
 const resizeObserver = new ResizeObserver(handleResizeObserver);
 
-// --- Lifecycle ---
 export const mountElement = (element: HTMLElement) => {
   if (stateRegistry.has(element)) return;
 
   const parent = getScrollParent(element);
+  const directParent = element.parentElement || parent;
 
   const attributeObserver = new MutationObserver((mutations) => {
     for (const mutation of mutations) {
@@ -92,6 +96,8 @@ export const mountElement = (element: HTMLElement) => {
   const state: ElementState = {
     element,
     parent,
+    directParent,
+    directParentRect: { top: 0, left: 0, width: 0, height: 0, bottom: 0, right: 0, x: 0, y: 0, toJSON: () => {} },
     naturalRect: { top: 0, left: 0, height: 0, width: 0 } as DOMRect,
     lastScrollPos: 0,
     isSticky: false,
@@ -110,6 +116,10 @@ export const mountElement = (element: HTMLElement) => {
 
   resizeObserver.observe(element);
   resizeObserver.observe(parent);
+
+  if (directParent !== parent) {
+    resizeObserver.observe(directParent);
+  }
 
   let scrollTick = false;
   const onScroll = () => {
@@ -131,15 +141,21 @@ export const mountElement = (element: HTMLElement) => {
     resizeObserver.unobserve(element);
 
     let parentInUse = false;
+    let directParentInUse = false;
+
     for (const [el, s] of stateRegistry.entries()) {
-      if (el !== element && s.parent === parent) {
-        parentInUse = true;
-        break;
-      }
+      if (el === element) continue;
+
+      if (s.parent === parent) parentInUse = true;
+      if (s.directParent === directParent) directParentInUse = true;
     }
 
     if (!parentInUse) {
       resizeObserver.unobserve(parent);
+    }
+
+    if (!directParentInUse && directParent !== parent) {
+      resizeObserver.unobserve(directParent);
     }
 
     stateRegistry.delete(element);

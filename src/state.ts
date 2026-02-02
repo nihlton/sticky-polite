@@ -1,148 +1,245 @@
+// state.ts
+
 import { CONFIG } from "./constants";
-import { applyStatic, applySticky, applyTransform, getScrollPosition, isCompletelyOutOfView } from "./dom";
+import { applyStatic, applySticky, applyTransform, getScrollPosition } from "./dom";
 import { ElementState } from "./types";
 
-export const updateElementState = (state: ElementState) => {
-  const { element, parent, lastScrollPos, naturalRect, cachedConfig: config, cachedViewportSize: viewportSize } = state;
-  const { edge } = config;
+// --- Types & Context ---
+// a junk-drawer of boundaries and measurements we'll need to dermine what to do
+interface FrameContext {
+  isVertical: boolean;
+  isStartAnchor: boolean; // top/left = true.  bottom/right = false;
+  currentScroll: number;
+  viewportSize: number;
+  scrollDelta: number;
+  offset: number; // CSS edge offset + container Padding)
+  implicitShift: number; // Visual shift from relative positioning
+  layoutStart: number;
+  dimension: number;
+  constraintStart: number;
+  constraintEnd: number;
+}
 
-  if (!config.valid) {
-    if (state.isSticky || state.isTransforming) {
-      element.style.position = "static";
-      element.style.transform = "";
-      state.isSticky = false;
-      state.isTransforming = false;
-    }
-    return;
-  }
+// --- Helpers ---
 
-  // Determine Directionality
-  const isStartAnchor = edge === "top" || edge === "left";
+const getFrameContext = (state: ElementState): FrameContext => {
+  const {
+    parent,
+    lastScrollPos,
+    naturalRect,
+    cachedConfig: config,
+    cachedViewportSize: viewportSize,
+    directParentRect,
+    cachedViewportPadding,
+  } = state;
+  const { edge, offset: cssOffset } = config;
+
   const isVertical = edge === "top" || edge === "bottom";
+  const isStartAnchor = edge === "top" || edge === "left";
 
   const currentScroll = getScrollPosition(parent, edge);
   const scrollDelta = currentScroll - lastScrollPos;
 
-  const edgePadding = state.cachedViewportPadding[edge];
-  const offset = config.offset + edgePadding;
-
-  state.lastScrollPos = currentScroll;
+  const offset = cssOffset + cachedViewportPadding[edge];
 
   // Dimensions
-  const naturalStart = isVertical ? naturalRect.top : naturalRect.left;
+  const layoutStart = isVertical ? naturalRect.top : naturalRect.left;
   const dimension = isVertical ? naturalRect.height : naturalRect.width;
 
-  // Logic Inversion for End Anchors (Bottom/Right)
-  const isScrollingAway = isStartAnchor ? scrollDelta > 0 : scrollDelta < 0;
-  const isScrollingToward = isStartAnchor ? scrollDelta < 0 : scrollDelta > 0;
+  // Implicit Shift & Visual Start
+  const implicitShift = isStartAnchor ? cssOffset : -cssOffset;
+  const visualStart = layoutStart + implicitShift;
 
-  // --- Reset Check (Natural Position) ---
-  // If we are "safe" in natural flow, reset to static.
-  let isNaturalSafe = false;
+  // Constraints
+  const constraintEnd = isVertical ? directParentRect.bottom : directParentRect.right;
+  const constraintStart = isVertical ? directParentRect.top : directParentRect.left;
 
-  if (isStartAnchor) {
-    // Top/Left: Safe if natural pos is below the sticky line
-    isNaturalSafe = naturalStart >= currentScroll + offset - CONFIG.epsilon;
-  } else {
-    // Bottom/Right: Safe if natural pos is above the sticky line
-    // Sticky Line = Scroll + Viewport - Offset
-    // Element End = naturalStart + dimension
-    isNaturalSafe = naturalStart + dimension <= currentScroll + viewportSize - offset + CONFIG.epsilon;
+  return {
+    isVertical,
+    isStartAnchor,
+    currentScroll,
+    viewportSize,
+    scrollDelta,
+    offset,
+    implicitShift,
+    layoutStart,
+    dimension,
+    constraintStart,
+    constraintEnd,
+  };
+};
+
+const isParentOutOfView = (ctx: FrameContext): boolean => {
+  const viewportEnd = ctx.currentScroll + ctx.viewportSize;
+  return ctx.constraintEnd < ctx.currentScroll || ctx.constraintStart > viewportEnd;
+};
+
+const isNaturalPosSafe = (ctx: FrameContext): boolean => {
+  if (ctx.isStartAnchor) {
+    return ctx.layoutStart >= ctx.currentScroll + ctx.offset - CONFIG.epsilon;
+  }
+  return ctx.layoutStart + ctx.dimension <= ctx.currentScroll + ctx.viewportSize - ctx.offset + CONFIG.epsilon;
+};
+
+const processScrollAway = (ctx: FrameContext, state: ElementState) => {
+  // Logic B: Scroll Away (Hide)
+  if (state.isSticky) {
+    let translation = 0;
+
+    if (ctx.isStartAnchor) {
+      // Visual Pos = Sticky Position = currentScroll + Offset
+      // Translation = TargetVisual - LayoutStart
+      const targetVisual = ctx.currentScroll + ctx.offset;
+      translation = targetVisual - ctx.layoutStart;
+    } else {
+      const targetVisual = ctx.currentScroll + ctx.viewportSize - ctx.offset - ctx.dimension;
+      translation = targetVisual - ctx.layoutStart;
+    }
+
+    // Adjust for Implicit Shift
+    const finalTransform = translation - ctx.implicitShift;
+
+    if (ctx.isVertical) applyTransform(state, 0, finalTransform);
+    else applyTransform(state, finalTransform, 0);
+
+    state.isSticky = false;
+    state.isTransforming = true;
   }
 
-  if (isNaturalSafe) {
+  // Optimization: Math-based Visibility Check (No DOM Read)
+  if (state.isTransforming) {
+    const currentVisualPos = ctx.layoutStart + state.currentTranslation + ctx.implicitShift;
+
+    let isHidden = false;
+    if (ctx.isStartAnchor) {
+      // Hidden if bottom of element is above scroll top
+      isHidden = currentVisualPos + ctx.dimension < ctx.currentScroll;
+    } else {
+      // Hidden if top of element is below scroll bottom
+      isHidden = currentVisualPos > ctx.currentScroll + ctx.viewportSize;
+    }
+
+    if (isHidden) {
+      applyStatic(state);
+      state.isTransforming = false;
+    }
+  }
+};
+
+const processScrollToward = (ctx: FrameContext, state: ElementState) => {
+  // Logic C: Scroll Toward (Reveal)
+
+  // 1. Check if we have physically passed the element
+  let isNaturallyPassed = false;
+  const visualStart = ctx.layoutStart + ctx.implicitShift;
+
+  if (ctx.isStartAnchor) {
+    isNaturallyPassed = visualStart + ctx.dimension < ctx.currentScroll;
+  } else {
+    isNaturallyPassed = visualStart > ctx.currentScroll + ctx.viewportSize;
+  }
+
+  // 2. Trigger: Place Element for Reveal
+  if (!state.isSticky && !state.isTransforming && isNaturallyPassed) {
+    let targetVisual = 0;
+
+    if (ctx.isStartAnchor) {
+      // Place bottom of element at top of viewport
+      targetVisual = ctx.currentScroll - ctx.dimension;
+
+      // Clamp
+      const maxPos = ctx.constraintEnd - ctx.dimension;
+      if (targetVisual > maxPos) targetVisual = maxPos;
+    } else {
+      // Place top of element at bottom of viewport
+      targetVisual = ctx.currentScroll + ctx.viewportSize;
+
+      // Clamp
+      const minPos = ctx.constraintStart;
+      if (targetVisual < minPos) targetVisual = minPos;
+    }
+
+    const translation = targetVisual - ctx.layoutStart;
+    const finalTransform = translation - ctx.implicitShift;
+
+    // Check for "Effectively Static"
+    if (Math.abs(finalTransform - -ctx.implicitShift) < CONFIG.epsilon) {
+      applyStatic(state);
+      state.isTransforming = false;
+    } else {
+      if (ctx.isVertical) applyTransform(state, 0, finalTransform);
+      else applyTransform(state, finalTransform, 0);
+      state.isTransforming = true;
+    }
+  }
+
+  // 3. Docking Check
+  if (state.isTransforming) {
+    const currentVisualPos = ctx.layoutStart + state.currentTranslation + ctx.implicitShift;
+    let shouldStick = false;
+
+    if (ctx.isStartAnchor) {
+      const stickyThreshold = ctx.currentScroll + ctx.offset;
+      if (currentVisualPos >= stickyThreshold - CONFIG.epsilon) {
+        shouldStick = true;
+      }
+    } else {
+      const stickyThreshold = ctx.currentScroll + ctx.viewportSize - ctx.offset;
+      if (currentVisualPos + ctx.dimension <= stickyThreshold + CONFIG.epsilon) {
+        shouldStick = true;
+      }
+    }
+
+    if (shouldStick) {
+      applySticky(state.element);
+      state.isSticky = true;
+      state.isTransforming = false;
+    }
+  }
+};
+
+export const updateElementState = (state: ElementState) => {
+  if (!state.cachedConfig.valid) {
+    if (state.isSticky || state.isTransforming) {
+      state.element.style.position = "static";
+      state.element.style.transform = "";
+      state.isSticky = false;
+      state.isTransforming = false;
+    }
+    return;
+  }
+
+  // 1. Prepare Context (Derived Variables)
+  const ctx = getFrameContext(state);
+  state.lastScrollPos = ctx.currentScroll;
+
+  // 2. Guard: Constraint Visibility
+  if (isParentOutOfView(ctx)) {
     if (state.isSticky || state.isTransforming) {
       applyStatic(state);
       state.isSticky = false;
       state.isTransforming = false;
     }
-
     return;
   }
 
-  // --- Logic B: Scroll Away (Hide) ---
-  if (isScrollingAway) {
-    if (state.isSticky) {
-      // Transition from Sticky -> Revealed (Drifting off)
-      let translation = 0;
-
-      if (isStartAnchor) {
-        // Target Visual = Scroll + Offset
-        // Translate = Target - Natural
-        const visualPos = currentScroll + offset;
-        translation = visualPos - naturalStart;
-      } else {
-        // Target Visual = Scroll + Viewport - Offset - Dimension
-        // (We position the top-left, so we subtract dimension to align bottom-right)
-        const visualPos = currentScroll + viewportSize - offset - dimension;
-        translation = visualPos - naturalStart;
-      }
-
-      if (isVertical) applyTransform(state, 0, translation);
-      else applyTransform(state, translation, 0);
-
-      state.isSticky = false;
-      state.isTransforming = true;
-    }
-
-    // Exit Reset: If completely off screen, just go static/invisible
-    if (state.isTransforming && isCompletelyOutOfView(element, parent)) {
+  // 3. Safety Check: Are we naturally below the fold?
+  if (isNaturalPosSafe(ctx)) {
+    if (state.isSticky || state.isTransforming) {
       applyStatic(state);
+      state.isSticky = false;
       state.isTransforming = false;
     }
     return;
   }
 
-  // --- Logic C: Scroll Toward (Reveal) ---
-  if (isScrollingToward) {
-    // Only reveal if we have naturally passed the element (it's off-screen)
-    let isNaturallyPassed = false;
-    if (isStartAnchor) {
-      isNaturallyPassed = naturalStart + dimension < currentScroll;
-    } else {
-      isNaturallyPassed = naturalStart > currentScroll + viewportSize;
-    }
+  const isScrollingAway = ctx.isStartAnchor ? ctx.scrollDelta > 0 : ctx.scrollDelta < 0;
+  const isScrollingToward = ctx.isStartAnchor ? ctx.scrollDelta < 0 : ctx.scrollDelta > 0;
 
-    // 1. Reveal (Transition State)
-    if (!state.isSticky && !state.isTransforming && isNaturallyPassed) {
-      let translation = 0;
-
-      if (isStartAnchor) {
-        // Place just above/left of viewport
-        const targetVisualPos = currentScroll - dimension;
-        translation = targetVisualPos - naturalStart;
-      } else {
-        // Place just below/right of viewport
-        const targetVisualPos = currentScroll + viewportSize;
-        translation = targetVisualPos - naturalStart;
-      }
-
-      if (isVertical) applyTransform(state, 0, translation);
-      else applyTransform(state, translation, 0);
-
-      state.isTransforming = true;
-    }
-
-    // 2. Sticky Docking (Logic D)
-    if (state.isTransforming) {
-      const currentVisualPos = naturalStart + state.currentTranslation;
-      let shouldStick = false;
-
-      if (isStartAnchor) {
-        const stickyThreshold = currentScroll + offset;
-        // If we slid down enough to hit the top offset
-        shouldStick = currentVisualPos >= stickyThreshold - CONFIG.epsilon;
-      } else {
-        const stickyThreshold = currentScroll + viewportSize - offset;
-        // If we slid up enough to hit the bottom offset
-        shouldStick = currentVisualPos + dimension <= stickyThreshold + CONFIG.epsilon;
-      }
-
-      if (shouldStick) {
-        applySticky(element);
-        state.isSticky = true;
-        state.isTransforming = false;
-      }
-    }
+  // 4. Directional Logic
+  if (isScrollingAway) {
+    processScrollAway(ctx, state);
+  } else if (isScrollingToward) {
+    processScrollToward(ctx, state);
   }
 };

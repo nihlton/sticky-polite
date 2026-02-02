@@ -34,8 +34,8 @@ code {
 .sticky-polite[data-polite-state="intersect"],
 .sticky-polite[data-polite-state="sticky"] {
   box-shadow:
-    0 1em 2em rgba(0, 0, 0, 0.2),
-    0 0.5em 0.75em -0.5em rgba(0, 0, 0, 0.5);
+    0 1em 1em -0.5em rgba(0, 0, 0, 0.1),
+    0 0.25em 0.5em -0.25em rgba(0, 0, 0, 0.4);
 }
 
 header {
