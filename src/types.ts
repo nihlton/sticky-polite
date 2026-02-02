@@ -16,6 +16,8 @@ export interface paddingConfig {
 export interface ElementState {
   element: HTMLElement;
   parent: HTMLElement;
+  directParent: HTMLElement; // New: The constraint container
+  directParentRect: DOMRect; // New: Cached relative position of the constraint
   naturalRect: DOMRect;
   lastScrollPos: number;
   isSticky: boolean;

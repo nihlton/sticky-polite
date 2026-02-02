@@ -1,3 +1,5 @@
+// dom.ts
+
 import { CONFIG } from "./constants";
 import { Config, Edge, ElementState, paddingConfig } from "./types";
 
@@ -38,7 +40,7 @@ export const injectAnimationBeacon = () => {
 };
 
 export const getContainerPadding = (container: HTMLElement | Window): paddingConfig => {
-  if (container instanceof Window) {
+  if (container instanceof Window || container === document.documentElement || container === document.body) {
     return defaultPaddingConfig;
   }
 
@@ -52,14 +54,9 @@ export const getContainerPadding = (container: HTMLElement | Window): paddingCon
 };
 
 export const applyTransform = (state: ElementState, targetX: number, targetY: number) => {
-  const { element, cachedConfig } = state;
-  const shift = getRelativeShift(cachedConfig);
-
-  const finalX = targetX - shift.x;
-  const finalY = targetY - shift.y;
-
+  const { element } = state;
   element.style.position = "relative";
-  element.style.transform = `translate3d(${finalX}px, ${finalY}px, 0)`;
+  element.style.transform = `translate3d(${targetX}px, ${targetY}px, 0)`;
   element.setAttribute(CONFIG.attrName, "intersect");
 
   state.currentTranslation = targetX !== 0 ? targetX : targetY;
@@ -106,69 +103,99 @@ export const getScrollParent = (node: HTMLElement): HTMLElement => {
   return getScrollParent(node.parentElement as HTMLElement);
 };
 
-export const getPageOffset = (element: HTMLElement): { top: number; left: number } => {
-  let el: HTMLElement | null = element;
-  let top = 0;
-  let left = 0;
+export const measureRelativeRect = (target: HTMLElement, ancestor: HTMLElement): DOMRect => {
+  const tRect = target.getBoundingClientRect();
 
-  while (el) {
-    top += el.offsetTop;
-    left += el.offsetLeft;
-    el = el.offsetParent as HTMLElement;
-  }
-  return { top, left };
-};
+  let aRectTop = 0;
+  let aRectLeft = 0;
+  let scrollTop = 0;
+  let scrollLeft = 0;
+  let clientTop = 0;
+  let clientLeft = 0;
 
-export const measureNaturalRect = (element: HTMLElement, parent: HTMLElement): DOMRect => {
-  // 1. Check if we need to clean-slate the element
-  // We only need to do this if the element is currently heavily modified
-  // (Sticky or Transformed) to ensure we get true "Natural" dimensions.
-  const isManaged = element.hasAttribute(CONFIG.attrName);
-  const prevPosition = element.style.position;
-  const prevTransform = element.style.transform;
-
-  if (isManaged) {
-    element.style.position = "relative";
-    element.style.transform = "";
+  if (ancestor === document.documentElement) {
+    scrollTop = window.scrollY;
+    scrollLeft = window.scrollX;
+  } else {
+    const aRect = ancestor.getBoundingClientRect();
+    aRectTop = aRect.top;
+    aRectLeft = aRect.left;
+    scrollTop = ancestor.scrollTop;
+    scrollLeft = ancestor.scrollLeft;
+    clientTop = ancestor.clientTop || 0;
+    clientLeft = ancestor.clientLeft || 0;
   }
 
-  const { width, height } = element.getBoundingClientRect();
-  const elOffset = getPageOffset(element);
-
-  if (isManaged) {
-    element.style.position = prevPosition;
-    element.style.transform = prevTransform;
-  }
-
-  if (parent === document.documentElement) {
-    return {
-      top: elOffset.top,
-      left: elOffset.left,
-      width,
-      height,
-      bottom: elOffset.top + height,
-      right: elOffset.left + width,
-      x: elOffset.left,
-      y: elOffset.top,
-      toJSON: () => {},
-    };
-  }
-
-  const parentOffset = getPageOffset(parent);
-  const top = elOffset.top - parentOffset.top - (parent.clientTop || 0);
-  const left = elOffset.left - parentOffset.left - (parent.clientLeft || 0);
+  const top = tRect.top - aRectTop + scrollTop - clientTop;
+  const left = tRect.left - aRectLeft + scrollLeft - clientLeft;
 
   return {
     top,
     left,
-    width,
-    height,
-    bottom: top + height,
-    right: left + width,
+    width: tRect.width,
+    height: tRect.height,
+    bottom: top + tRect.height,
+    right: left + tRect.width,
     x: left,
     y: top,
     toJSON: () => {},
   };
+};
+
+export const measureConstraintRect = (target: HTMLElement, ancestor: HTMLElement): DOMRect => {
+  // Fix for Issue 3 (Nested Scroll):
+  // If the direct parent IS the scrolling container, the constraint is the
+  // CONTENT size (scrollHeight), not the VIEWPORT size (getBoundingClientRect).
+  if (target === ancestor) {
+    const width = ancestor.scrollWidth;
+    const height = ancestor.scrollHeight;
+    return {
+      top: 0,
+      left: 0,
+      width,
+      height,
+      bottom: height,
+      right: width,
+      x: 0,
+      y: 0,
+      toJSON: () => {},
+    };
+  }
+
+  return measureRelativeRect(target, ancestor);
+};
+
+export const measureNaturalRect = (element: HTMLElement, parent: HTMLElement): DOMRect => {
+  const isManaged = element.hasAttribute(CONFIG.attrName);
+
+  const prevPosition = element.style.position;
+  const prevTransform = element.style.transform;
+  const prevTop = element.style.top;
+  const prevLeft = element.style.left;
+  const prevRight = element.style.right;
+  const prevBottom = element.style.bottom;
+
+  if (isManaged) {
+    element.style.position = "relative";
+    element.style.transform = "";
+    element.style.top = "auto";
+    element.style.left = "auto";
+    element.style.right = "auto";
+    element.style.bottom = "auto";
+  }
+
+  const rect = measureRelativeRect(element, parent);
+
+  if (isManaged) {
+    element.style.position = prevPosition;
+    element.style.transform = prevTransform;
+    element.style.top = prevTop;
+    element.style.left = prevLeft;
+    element.style.right = prevRight;
+    element.style.bottom = prevBottom;
+  }
+
+  return rect;
 };
 
 export const isCompletelyOutOfView = (element: HTMLElement, parent: HTMLElement): boolean => {
@@ -199,7 +226,6 @@ export const isCompletelyOutOfView = (element: HTMLElement, parent: HTMLElement)
 };
 
 export const readConfigFromDOM = (element: HTMLElement): Config => {
-  // 1. Clean Slate: Temporarily remove inline positioning.
   const prevPosition = element.style.position;
   const isManaged = element.hasAttribute(CONFIG.attrName);
 
@@ -211,17 +237,13 @@ export const readConfigFromDOM = (element: HTMLElement): Config => {
   let foundEdge: Edge | null = null;
   let foundOffset = 0;
 
-  // 2. Attempt Modern API (CSS Typed OM)
   if ("computedStyleMap" in element) {
     try {
       const map = element.computedStyleMap();
       for (const edge of edges) {
         const val = map.get(edge);
-
-        // In Typed OM, 'auto' is a CSSKeywordValue. We only want CSSUnitValue.
         if (val && "value" in val && typeof val.value === "number") {
           if (foundEdge) {
-            // Restore before returning
             if (isManaged) element.style.position = prevPosition;
             return { valid: false, edge: "top", offset: 0 };
           }
@@ -232,12 +254,10 @@ export const readConfigFromDOM = (element: HTMLElement): Config => {
     } catch (e) {}
   }
 
-  // 3. Fallback (Firefox / Legacy) or if Typed OM was skipped
   if (!foundEdge) {
     const style = getComputedStyle(element);
     for (const edge of edges) {
       const value = style.getPropertyValue(edge);
-      // Check for non-auto, non-empty values
       if (value && value !== "auto" && value !== "") {
         if (foundEdge) {
           if (isManaged) element.style.position = prevPosition;
@@ -249,7 +269,6 @@ export const readConfigFromDOM = (element: HTMLElement): Config => {
     }
   }
 
-  // 4. Restore State
   if (isManaged) {
     element.style.position = prevPosition;
   }
