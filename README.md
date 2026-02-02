@@ -1,5 +1,10 @@
 # sticky-polite
 
+![npm package minimized gzipped size](https://img.shields.io/bundlejs/size/sticky-polite)
+![Zero Dependencies](https://img.shields.io/badge/dependencies-none-green.svg)
+
+![stick-polite-animation](https://github.com/user-attachments/assets/be262276-443d-4362-b24f-1dd4f84dcd20)
+
 A robust, zero-dependency utility for "Polite" sticky positioning. Imagine if `position: sticky` could understand when your user wants it out of the way and politely excuses itself from the viewport.
 
 It strikes a balance between keeping important page elements highly available, and keeping the screen clear of distractions.
