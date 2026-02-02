@@ -4,7 +4,13 @@
   "description": "Position sticky when you need it, out of the way when you dont",
   "keywords": [
     "css",
-    "sticky"
+    "sticky",
+    "header",
+    "navigation",
+    "scroll",
+    "interaction",
+    "react-sticky",
+    "vue-sticky"
   ],
   "sideEffects": true,
   "homepage": "https://github.com/nihlton/sticky-polite#readme",
