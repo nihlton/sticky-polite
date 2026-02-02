@@ -39,31 +39,27 @@ npm install sticky-polite
 
 Import the package.
 
-```html
-<script src="https://unpkg.com/sticky-polite/dist/index.cjs"></script>
-```
-or
 ```javascript
 // main.js or index.js
 import "sticky-polite";
+```
+or
+```html
+<script src="https://unpkg.com/sticky-polite/dist/index.cjs"></script>
 ```
 
 Add the class and an edge offset to an element:
 
 ```html
-<header class="sticky-polite" style="top: 1rem">My Header</header>
-```
+// inline edge offset
+<header class="sticky-polite" style="top: 1rem">Header</header>
 
-or
+- or -
 
-```
+// via stylesheet
 <style>
-  footer.sticky-polite { bottom: 20px }
+  header.sticky-polite { top: 20px }
 </style>
-
-...
-
-<footer class="sticky-polite">My Footer</footer>
 ```
 
 **Important Notes:**
@@ -81,15 +77,15 @@ You can optionally style the element based on the state it's in.
 
 ```css
 .sticky-polite[data-polite-state="static"] {
-  box-shadow: none;
+  outline: none;
 }
 
 .sticky-polite[data-polite-state="intersect"] {
-  box-shadow: 0 0 0 3px orange;
+  outline: 3px solid green;
 }
 
 .sticky-polite[data-polite-state="sticky"] {
-  box-shadow: 0 1em 2em rgba(0, 0, 0, 0.2);
+  outline: 3px solid blue;
 }
 ```
 
