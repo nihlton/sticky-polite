@@ -20,7 +20,7 @@ It strikes a balance between keeping important page elements highly available, a
 
 - **Nearly-Zero setup:** Apply the class name `sticky-polite` to an element, and you are done.
 - **Axis and Direction agnostic:** Elements can stick to the top, bottom, left or right.
-- **Compatible with your React/Vue/Svelte:** Performance-optimized observers handle `sticky-polite` elements as they're created and destroyed to seamlessly coorperate with React/Vue/Svelte lifecycles.
+- **Compatible with React/Vue/Svelte:** Performance-optimized observers handle `sticky-polite` elements as they're created and destroyed to seamlessly coorperate with React/Vue/Svelte lifecycles.
 - **Supports nested scrolling containers:** Elements within a scroll container will respect the boundaries of its parent.
 - **No animations/transitions:** Interactions feel buttery and smooth, like native browser behavior - because most of it is!
 
