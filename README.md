@@ -1,15 +1,16 @@
 # sticky-polite
 
 ![npm package minimized gzipped size](https://img.shields.io/bundlejs/size/sticky-polite)
-![Zero Dependencies](https://img.shields.io/badge/dependencies-none-green.svg)
+![Zero Dependencies](https://img.shields.io/badge/dependencies-0-blue.svg)
+![Static Badge](https://img.shields.io/badge/react-compatible-blue?logo=react&logoColor=white)
+![Static Badge](https://img.shields.io/badge/vue-compatible-blue?logo=vue.js&logoColor=white)
+![Static Badge](https://img.shields.io/badge/svelte-compatible-blue?logo=svelte&logoColor=white)
 
 ![stick-polite-animation](https://github.com/user-attachments/assets/be262276-443d-4362-b24f-1dd4f84dcd20)
 
-A robust, zero-dependency utility for "Polite" sticky positioning. Imagine if `position: sticky` could understand when your user wants it out of the way and politely excuses itself from the viewport.
+A robust, zero-dependency headless utility for "Polite" sticky positioning. Imagine if `position: sticky` could understand when your user wants it out of the way and politely excuses itself from the viewport.
 
 It strikes a balance between keeping important page elements highly available, and keeping the screen clear of distractions.
-
-As an example - Scrolling down allows your header to gracefully scroll off screen, returning valuable screen real estate. Scrolling up later immediately recalls your header.
 
 [Code Sandbox](https://codesandbox.io/p/sandbox/h6z4jh)
 
@@ -19,7 +20,7 @@ As an example - Scrolling down allows your header to gracefully scroll off scree
 
 - **Nearly-Zero setup:** Apply the class name `sticky-polite` to an element, and you are done.
 - **Axis and Direction agnostic:** Elements can stick to the top, bottom, left or right.
-- **SPA Ready:** Performance-optimized observers catch `sticky-polite` elements as they're created and destroyed to handle React/Vue/Svelte lifecycles automatically.
+- **Compatible with your React/Vue/Svelte:** Performance-optimized observers handle `sticky-polite` elements as they're created and destroyed to seamlessly coorperate with React/Vue/Svelte lifecycles.
 - **Supports nested scrolling containers:** Elements within a scroll container will respect the boundaries of its parent.
 - **No animations/transitions:** Interactions feel buttery and smooth, like native browser behavior - because most of it is!
 
