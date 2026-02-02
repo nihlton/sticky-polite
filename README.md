@@ -42,7 +42,7 @@ Import the package.
 ```html
 <script src="https://unpkg.com/sticky-polite/dist/index.cjs"></script>
 ```
-
+or
 ```javascript
 // main.js or index.js
 import "sticky-polite";
