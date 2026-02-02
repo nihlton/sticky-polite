@@ -1,5 +1,3 @@
-// src/observer.ts
-
 import { CONFIG } from "./constants";
 import {
   applyStatic,

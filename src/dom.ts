@@ -1,10 +1,23 @@
-// --- DOM & Math Helpers ---
-
 import { CONFIG } from "./constants";
-import { getRelativeShift } from "./math";
 import { Config, Edge, ElementState, paddingConfig } from "./types";
 
 export const defaultPaddingConfig = { top: 0, bottom: 0, left: 0, right: 0 };
+
+const getRelativeShift = (config: Config): { x: number; y: number } => {
+  if (!config.valid) return { x: 0, y: 0 };
+  const { edge, offset } = config;
+
+  switch (edge) {
+    case "top":
+      return { x: 0, y: offset };
+    case "bottom":
+      return { x: 0, y: -offset };
+    case "left":
+      return { x: offset, y: 0 };
+    case "right":
+      return { x: -offset, y: 0 };
+  }
+};
 
 export const injectAnimationBeacon = () => {
   if (document.getElementById("sticky-polite-beacon")) return;
