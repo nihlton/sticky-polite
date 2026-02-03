@@ -8,9 +8,9 @@
 
 ![stick-polite-animation](https://github.com/user-attachments/assets/be262276-443d-4362-b24f-1dd4f84dcd20)
 
-A robust, zero-dependency headless utility for "Polite" sticky positioning. Imagine if `position: sticky` could understand when your user wants it out of the way and politely excuses itself from the viewport.
+A robust, zero-dependency headless utility for 'polite' sticky positioning. Imagine if `position: sticky` could understand when your user wants it out of the way and politely excuses itself from the viewport.
 
-It strikes a balance between keeping important page elements highly available, and keeping the screen clear of distractions.
+Keep important page elements highly available, while keeping the screen clear of distractions.
 
 [Code Sandbox](https://codesandbox.io/p/sandbox/h6z4jh)
 
@@ -18,16 +18,17 @@ It strikes a balance between keeping important page elements highly available, a
 
 **Key Features:**
 
-- **Nearly-Zero setup:** Apply the class name `sticky-polite` to an element, and you are done.
-- **Axis and Direction agnostic:** Elements can stick to the top, bottom, left or right.
-- **Compatible with React/Vue/Svelte:** Performance-optimized observers handle `sticky-polite` elements as they're created and destroyed to seamlessly coorperate with React/Vue/Svelte lifecycles.
+- **nearly-zero setup:** Apply the class name `sticky-polite` and an edge offset to an element, and you are done.
+- **Compatible with React/Vue/Svelte:** Performance-optimized observers manage `sticky-polite` element lifecycles.
+- **axis and direction agnostic:** Elements can stick to the top, bottom, left or right.
 - **Supports nested scrolling containers:** Elements within a scroll container will respect the boundaries of its parent.
 - **No animations/transitions:** Interactions feel buttery and smooth, like native browser behavior - because most of it is!
 
 **Limitations:**
 
-- **Mobile footer:** Mobile browsers manipulate the viewport size when you scroll down in a ways that are difficult to predict/track/adapt to. Footers whose scrolling-parent are the body/document cannot always transition smoothly between 'hidden' and 'visible' and vice versa. So it goes.
-
+- **Mobile footer:** Mobile browsers manipulate the viewport size when scrolling in a ways that are difficult to predict/adapt to. Footers whose scrolling-parent are the body/document cannot always transition smoothly between 'hidden' and 'visible'. So it goes.
+- **single edge:** While `position: sticky` supports all four edges simultaneously, `sticky-polite` supports one. This feels like the appropriate balance between package size/complexity and core-use coverage.
+  
 ## Installation
 
 ```bash
