@@ -158,6 +158,10 @@ export const mountElement = (element: HTMLElement) => {
       resizeObserver.unobserve(directParent);
     }
 
+    element.style.position = "";
+    element.style.transform = "";
+    element.removeAttribute(CONFIG.attrName);
+
     stateRegistry.delete(element);
     cleanupRegistry.delete(element);
   });
