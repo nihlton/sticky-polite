@@ -198,33 +198,6 @@ export const measureNaturalRect = (element: HTMLElement, parent: HTMLElement): D
   return rect;
 };
 
-export const isCompletelyOutOfView = (element: HTMLElement, parent: HTMLElement): boolean => {
-  const rect = element.getBoundingClientRect();
-
-  let parentRect;
-  if (parent === document.documentElement) {
-    if (window.visualViewport) {
-      parentRect = {
-        top: 0,
-        left: 0,
-        bottom: window.visualViewport.height,
-        right: window.visualViewport.width,
-      };
-    } else {
-      parentRect = {
-        top: 0,
-        left: 0,
-        bottom: window.innerHeight,
-        right: window.innerWidth,
-      };
-    }
-  } else {
-    parentRect = parent.getBoundingClientRect();
-  }
-
-  return rect.bottom < parentRect.top || rect.top > parentRect.bottom || rect.right < parentRect.left || rect.left > parentRect.right;
-};
-
 export const readConfigFromDOM = (element: HTMLElement): Config => {
   const prevPosition = element.style.position;
   const isManaged = element.hasAttribute(CONFIG.attrName);
