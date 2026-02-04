@@ -6,11 +6,23 @@
 ![Static Badge](https://img.shields.io/badge/vue-compatible-blue?logo=vue.js&logoColor=white)
 ![Static Badge](https://img.shields.io/badge/svelte-compatible-blue?logo=svelte&logoColor=white)
 
-![stick-polite-animation](https://github.com/user-attachments/assets/be262276-443d-4362-b24f-1dd4f84dcd20)
 
 A robust, zero-dependency headless utility for 'polite' sticky positioning. Imagine if `position: sticky` could understand when your user wants it out of the way and politely excuses itself from the viewport.
 
 Keep important page elements highly available, while keeping the screen clear of distractions.
+
+![stick-polite-animation](https://github.com/user-attachments/assets/be262276-443d-4362-b24f-1dd4f84dcd20)
+
+
+**example:**
+
+```html
+
+<header class="sticky-polite" style="top: 0px">
+  <h1>It's that easy</h1>
+</header>
+
+```
 
 [Code Sandbox](https://codesandbox.io/p/sandbox/h6z4jh)
 
