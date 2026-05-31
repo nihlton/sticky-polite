@@ -18,7 +18,6 @@ import { ElementState } from "./types";
 
 const stateRegistry = new Map<HTMLElement, ElementState>();
 const cleanupRegistry = new Map<HTMLElement, () => void>();
-
 const resizeTickMap = new WeakMap<ElementState, boolean>();
 
 const refreshState = (state: ElementState) => {
@@ -167,26 +166,13 @@ export const mountElement = (element: HTMLElement) => {
   });
 };
 
-export const handleMutations = (mutations: MutationRecord[]) => {
-  let checkRemovals = false;
-
-  for (const { type, addedNodes, removedNodes } of mutations) {
-    if (type === "childList") {
-      addedNodes.forEach((node) => {
-        if (node instanceof HTMLElement) {
-          if (node.classList.contains(CONFIG.className)) mountElement(node);
-          node.querySelectorAll(`.${CONFIG.className}`).forEach((el) => mountElement(el as HTMLElement));
-        }
-      });
-      checkRemovals = checkRemovals || Boolean(removedNodes.length);
-    }
-  }
-
-  if (checkRemovals) {
-    Array.from(cleanupRegistry.keys()).forEach((node) => {
-      if (!document.contains(node)) cleanupRegistry.get(node)?.();
-    });
-  }
+// we're only using the mutation event as a signal.
+// for every mutation - clean up any elements which
+// are no longer connected to a Document
+export const handleMutations = () => {
+  Array.from(cleanupRegistry.keys()).forEach((node) => {
+    if (!node || !node.isConnected) cleanupRegistry.get(node)?.();
+  });
 };
 
 const handleAnimationStart = (event: AnimationEvent) => {
