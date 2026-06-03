@@ -131,7 +131,7 @@ export const mountElement = (element: HTMLElement) => {
   };
 
   const scrollTarget = parent === document.documentElement ? window : parent;
-  scrollTarget.addEventListener("scroll", onScroll, { passive: true });
+  scrollTarget.addEventListener("scroll", onScroll, { passive: true, capture: true });
 
   cleanupRegistry.set(element, () => {
     scrollTarget.removeEventListener("scroll", onScroll);
